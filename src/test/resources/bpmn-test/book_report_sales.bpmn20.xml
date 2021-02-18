@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+        xmlns:activiti="http://activiti.org/bpmn"
+        xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+        targetNamespace="studerw.com">
+    <process id="BOOK_REPORT___sales" name="Book Report Sales Workflow" isExecutable="true">
+        <documentation>This process is explicit for Book Report and Group=sales</documentation>
+        <startEvent id="startevent" name="Start" activiti:initiator="initiator"></startEvent>
+        <serviceTask id="publishBookReport" name="Publish Book Report"
+                     activiti:expression="${documentService.publish(execution)}"></serviceTask>
+        <userTask id="submitToWorkflow" name="Submit Book Report to Workflow"></userTask>
+        <endEvent id="endevent" name="End"></endEvent>
+        <subProcess id="DYNAMIC_SUB_PROCESS" name="Dynamic Document Subprocess">
+            <startEvent id="dynamic_sub_process_start_event" name="Start Dynamic SubProcess"></startEvent>
+            <endEvent id="dynamic_sub_process_end_event" name="End Dynamic SubProcess"></endEvent>
+            <endEvent id="rejectedErrorEndEvent" name="ErrorEnd">
+                <errorEventDefinition errorRef="errorDocRejected"></errorEventDefinition>
+            </endEvent>
+        </subProcess>
+        <boundaryEvent id="REJECTED_ERROR_BOUNDARY_EVENT" name="Rejected Error Event" attachedToRef="DYNAMIC_SUB_PROCESS">
+            <errorEventDefinition errorRef="ERROR_DOC_REJECTED"></errorEventDefinition>
+        </boundaryEvent>
+        <sequenceFlow id="flow1" sourceRef="startevent" targetRef="submitToWorkflow"></sequenceFlow>
+        <sequenceFlow id="flow2" sourceRef="submitToWorkflow" targetRef="DYNAMIC_SUB_PROCESS"></sequenceFlow>
+        <sequenceFlow id="flow3" sourceRef="DYNAMIC_SUB_PROCESS" targetRef="publishBookReport"></sequenceFlow>
+        <sequenceFlow id="flow4" sourceRef="publishBookReport" targetRef="endevent"></sequenceFlow>
+        <sequenceFlow id="flow5" name="Doc Rejected" sourceRef="REJECTED_ERROR_BOUNDARY_EVENT" targetRef="submitToWorkflow"></sequenceFlow>
+    </process>
+</definitions>

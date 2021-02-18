@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="studerw.com">
+    <process id="BOOK_REPORT___NONE" name="Book Report Workflow" isExecutable="true">
+        <documentation>This process is initiated when a book report is created.</documentation>
+        <startEvent id="startevent" name="Start" activiti:initiator="initiator"></startEvent>
+        <serviceTask id="publishBookReport" name="Publish Book Report"
+                     activiti:expression="${documentService.publish(execution)}"></serviceTask>
+        <userTask id="submitToWorkflow" name="Submit Book Report to Workflow"></userTask>
+        <endEvent id="endevent" name="End"></endEvent>
+        <subProcess id="DYNAMIC_SUB_PROCESS" name="Dynamic Document Subprocess">
+            <startEvent id="dynamic_sub_process_start_event" name="Start Dynamic SubProcess"></startEvent>
+            <endEvent id="dynamic_sub_process_end_event" name="End Dynamic SubProcess"></endEvent>
+            <endEvent id="rejectedErrorEndEvent" name="ErrorEnd">
+                <errorEventDefinition errorRef="errorDocRejected"></errorEventDefinition>
+            </endEvent>
+            <sequenceFlow sourceRef="dynamic_sub_process_start_event" targetRef="dynamic_sub_process_end_event"/>
+        </subProcess>
+        <boundaryEvent id="REJECTED_ERROR_BOUNDARY_EVENT" name="Rejected Error Event" attachedToRef="DYNAMIC_SUB_PROCESS">
+            <errorEventDefinition errorRef="ERROR_DOC_REJECTED"></errorEventDefinition>
+        </boundaryEvent>
+        <sequenceFlow id="flow1" sourceRef="startevent" targetRef="submitToWorkflow"></sequenceFlow>
+        <sequenceFlow id="flow2" sourceRef="submitToWorkflow" targetRef="DYNAMIC_SUB_PROCESS"></sequenceFlow>
+        <sequenceFlow id="flow3" sourceRef="DYNAMIC_SUB_PROCESS" targetRef="publishBookReport"></sequenceFlow>
+        <sequenceFlow id="flow4" sourceRef="publishBookReport" targetRef="endevent"></sequenceFlow>
+        <sequenceFlow id="flow5" name="Doc Rejected" sourceRef="REJECTED_ERROR_BOUNDARY_EVENT" targetRef="submitToWorkflow"></sequenceFlow>
+    </process>
+    <!--
+    <bpmndi:BPMNDiagram id="BPMNDiagram_bookReportWorkflow">
+        <bpmndi:BPMNPlane bpmnElement="bookReportWorkflow" id="BPMNPlane_bookReportWorkflow">
+            <bpmndi:BPMNShape bpmnElement="startevent" id="BPMNShape_startevent">
+                <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="110.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="publishBookReport" id="BPMNShape_publishBookReport">
+                <omgdc:Bounds height="126.0" width="105.0" x="350.0" y="62.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="submitToWorkflow" id="BPMNShape_submitToWorkflow">
+                <omgdc:Bounds height="141.0" width="105.0" x="80.0" y="57.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="endevent" id="BPMNShape_endevent">
+                <omgdc:Bounds height="35.0" width="35.0" x="500.0" y="110.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="DYNAMIC_SUB_PROCESS" id="BPMNShape_DYNAMIC_SUB_PROCESS">
+                <omgdc:Bounds height="250.0" width="70.0" x="230.0" y="0.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="dynamic_sub_process_start_event"
+                              id="BPMNShape_dynamic_sub_process_start_event">
+                <omgdc:Bounds height="35.0" width="35.0" x="250.0" y="20.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="dynamic_sub_process_end_event" id="BPMNShape_dynamic_sub_process_end_event">
+                <omgdc:Bounds height="35.0" width="35.0" x="250.0" y="110.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="rejectedErrorEndEvent" id="BPMNShape_rejectedErrorEndEvent">
+                <omgdc:Bounds height="35.0" width="35.0" x="250.0" y="200.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="REJECTED_ERROR_BOUNDARY_EVENT" id="BPMNShape_REJECTED_ERROR_BOUNDARY_EVENT">
+                <omgdc:Bounds height="30.0" width="30.0" x="271.0" y="235.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+                <omgdi:waypoint x="35.0" y="127.0"></omgdi:waypoint>
+                <omgdi:waypoint x="80.0" y="127.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+                <omgdi:waypoint x="185.0" y="127.0"></omgdi:waypoint>
+                <omgdi:waypoint x="230.0" y="125.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+                <omgdi:waypoint x="300.0" y="125.0"></omgdi:waypoint>
+                <omgdi:waypoint x="350.0" y="125.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+                <omgdi:waypoint x="455.0" y="125.0"></omgdi:waypoint>
+                <omgdi:waypoint x="500.0" y="127.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+    -->
+</definitions>
